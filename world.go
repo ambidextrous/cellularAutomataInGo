@@ -1,13 +1,14 @@
 package main
 
 World struct {
-	[][]Node node
-	int height
-	int width
-	[][]int oneSpaceMoves
+	nodes 			[][]node 
+	height 			int 
+	width 			int 
+	oneSpaceMoves 	[][]int 
+	worldType 		string 
 }
 
-func populate(w world) {
+func populate(w *world) {
 
 	// species1 intialisation
 	species1Lifetime = 10000
@@ -28,5 +29,60 @@ func populate(w world) {
 	go run(species2)
 }
 
+func generateOneSpaceMoves() [][]int {
+	int numDirections = 9
+	int numDimensions = 2
+	moves := [numDirections][numDimensions]int
 
+	moves[0,0] = -1 
+	moves[0,1] = 1
 
+	moves[1,0] = 0
+	moves[1,1] = 1
+
+	moves[2,0] = 1
+	moves[2,1] = 1
+
+	moves[3,0] = -1
+	moves[3,1] = 0
+
+	moves[4,0] = 0
+	moves[4,1] = 0
+
+	moves[5,0] = 1
+	moves[5,1] = 0
+
+	moves[6,0] = -1
+	moves[6,1] = -1
+
+	moves[7,0] = 0
+	moves[7,1] = -1
+
+	moves[8,0] = 1
+	moves[8,1] = -1
+
+	return moves
+}
+
+func generateNodes(w *world) {
+	for i := range len(w.width) {
+		for j := range len(w.height) {
+			ch := make(chan<- string)
+			n = node{horiz: i, vert: j, resident: nil, neighbouringNodes: nil, channelToResident: ch}
+			w.nodes[i][j] = n
+		}
+	}
+} 
+
+func assignNeighbours(w *world) {
+	for i := range w.height {
+		for j := range w.width {
+			n :=  // Should this be a pointer?
+			select {
+				case worldType == "flatWorld":
+					getFlatworldNeighbouringNodes()
+
+			}
+		}
+	}
+}

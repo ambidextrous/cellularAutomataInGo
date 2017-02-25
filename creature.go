@@ -30,16 +30,23 @@ type species struct {
 }
 
 func run(s species) {
-
-	time.Sleep(s.lifeTime) 
-	select {
-	case <- channelFromNode:
-		fmt.Println("Alas, for I am slain!")
-		return
-	default: // Apparently "Adding default will make it not block" ? Try deleting this line if causes problems
-	}	
-	reproduce(s)
-	fmt.Println("A child is born?")
+	start := time.Now()
+	for {
+		select {
+			// If lifetime over, reproduce and return
+			case time.Now() > start + s.lifeTime:
+				fmt.Println("A child is born!")
+				reproduce(s)
+				return 
+			// If interrupted, return without reproducing
+			case <-s.channelFromNode:
+				fmt.Println("Alas, for I am slain!")
+				s.node.resident = nil
+				return
+			// Otherwise, do nothing
+			default: // Prevents goroutine from blocking
+		}
+	}
 }
 
 func populateNode(parent species, n node) {
