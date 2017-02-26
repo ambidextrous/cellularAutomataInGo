@@ -22,11 +22,11 @@ import "math/rand"
 
 
 type species struct {
-	string  name
-	int     lifeTime
-	float32 fitness
-	node    node
-	<-chan string channelFromNode
+	name 				string 
+	lifeTime 			int    
+	fitness 			float32
+	node    			node
+	channelFromNode 	<-chan string
 }
 
 func run(s species) {

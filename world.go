@@ -1,11 +1,16 @@
 package main
 
-World struct {
+world struct {
 	nodes 			[][]node 
 	height 			int 
 	width 			int 
 	oneSpaceMoves 	[][]int 
 	worldType 		string 
+}
+
+func createDefaultWorld() world {
+	w := world{nodes: nil, height: 10, width: 30, oneSpaceMoves: nil, worldType: "roundWorld"}
+	return w
 }
 
 func populate(w *world) {
@@ -77,12 +82,53 @@ func generateNodes(w *world) {
 func assignNeighbours(w *world) {
 	for i := range w.height {
 		for j := range w.width {
-			n :=  // Should this be a pointer?
+			&n := w.nodes[i][j] // Pointer
 			select {
-				case worldType == "flatWorld":
-					getFlatworldNeighbouringNodes()
-
+				case w.worldType == "flatWorld":
+					fmt.Println("Making flatWorld")
+					neighbours := getFlatWorldNeighbouringNodes(&n,&w)
+				case w.worldType == "roundWorld":
+					fmt.Println("Making roundWorld")
+					neighbours := getRoundWorldNeighbouringNodes(&n,&w)
+				default:
+					fmt.Println("Making default world (roundWorld)")
+					 neighbourss := getRoundWorldNeighbouringNodes(&n,&w)
 			}
 		}
 	}
+}
+
+func getRoundWorldNeighbouringNodes(n *node, w *world) []*node {
+	numNeighbours := 9
+	validNeighbours := make([]*node, numNeighbours)
+	for i, oneSpaceMove := range w.oneSpaceMoves {
+		hCoordinate := 0
+		neighbouringH := n.vert + oneSpaceMove[hCoordinate]
+		wCoordinate := 1
+		neighbouringW := n.horiz + oneSpaceMove[wCoordinate]
+		if neighbouringH == -1 {
+			neighbouringH = w.height - 1
+		} else if neighbouringH == w.height {
+			neighbouringH = 0
+		}
+		if neighbouringW == -1 {
+			neighbouringW = w.width - 1
+		} else if neighbouringW == w.width {
+			neighbouringW = 0
+		}
+		neighour := &w.nodes[neighbouringH][neighbouringW]
+		validNeighbours[i] = neighour 
+	} 
+	return validNeighbours
+}
+
+func (w world) String() string {
+	worldState := ""
+	for i := 0 ; i < w.horiz ; i++ {
+		for j := 0 ; j < w.vert ; j++ {
+			worldState += w.nodes[i][j]
+		}
+		worldState += "\n"
+	} 
+	return worldState
 }

@@ -1,14 +1,15 @@
 package main
 
 type node stuct {
-	int horiz
-	int vert
-	species resident
-	[]node neighbouringNodes // Slice needs to be made prior to assignment
-	chan<- string channelToResident // Channel needs to be made prior to assignment
+	horiz 				int
+	vert 				int
+	resident 			species
+	neighbouringNodes 	[]node  // Slice needs to be made prior to assignment
+	channelToResident 	chan<- string  // Channel needs to be made prior to assignment
 }
 
-func murderOccupant(n node) {
+func murderOccupant(n *node) {
+	fmt.Println("Have at you, vile curr!")
 	n.channelToResident <- "BANG!"
 }
 
