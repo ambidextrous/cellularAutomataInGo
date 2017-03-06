@@ -1,11 +1,11 @@
 package main
 
-type node stuct {
-	horiz 				int
-	vert 				int
-	resident 			species
-	neighbouringNodes 	[]node  // Slice needs to be made prior to assignment
-	channelToResident 	chan<- string  // Channel needs to be made prior to assignment
+type node struct {
+	horiz             int
+	vert              int
+	resident          species
+	neighbouringNodes []node        // Slice needs to be made prior to assignment
+	channelToResident chan<- string // Channel needs to be made prior to assignment
 }
 
 func murderOccupant(n *node) {

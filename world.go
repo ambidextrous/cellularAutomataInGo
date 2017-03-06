@@ -1,6 +1,6 @@
 package main
 
-world struct {
+type world struct {
 	nodes 			[][]node 
 	height 			int 
 	width 			int 
@@ -35,36 +35,36 @@ func populate(w *world) {
 }
 
 func generateOneSpaceMoves() [][]int {
-	int numDirections = 9
-	int numDimensions = 2
+	numDirections := 9
+	numDimensions := 2
 	moves := [numDirections][numDimensions]int
 
-	moves[0,0] = -1 
-	moves[0,1] = 1
+	moves[0][0] = -1 
+	moves[0][1] = 1
 
-	moves[1,0] = 0
-	moves[1,1] = 1
+	moves[1][0] = 0
+	moves[1][1] = 1
 
-	moves[2,0] = 1
-	moves[2,1] = 1
+	moves[2][0] = 1
+	moves[2][1] = 1
 
-	moves[3,0] = -1
-	moves[3,1] = 0
+	moves[3][0] = -1
+	moves[3][1] = 0
 
-	moves[4,0] = 0
-	moves[4,1] = 0
+	moves[4][0] = 0
+	moves[4][1] = 0
 
-	moves[5,0] = 1
-	moves[5,1] = 0
+	moves[5][0] = 1
+	moves[5][1] = 0
 
-	moves[6,0] = -1
-	moves[6,1] = -1
+	moves[6][0] = -1
+	moves[6][1] = -1
 
-	moves[7,0] = 0
-	moves[7,1] = -1
+	moves[7][0] = 0
+	moves[7][1] = -1
 
-	moves[8,0] = 1
-	moves[8,1] = -1
+	moves[8][0] = 1
+	moves[8][1] = -1
 
 	return moves
 }
