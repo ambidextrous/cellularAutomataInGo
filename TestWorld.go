@@ -17,7 +17,8 @@ func (w world) String() string {
 	worldState := ""
 	for i := 0; i < w.width; i++ {
 		for j := 0; j < w.height; j++ {
-			worldState += *w.nodes[i][j]
+			n := w.nodes[i][j]
+			worldState += n.resident.species
 			//string nodeState = w.nodes[i][j]
 			//worldState += nodeState
 		}
@@ -38,10 +39,11 @@ type node struct {
 // Returns string representation of a given node
 func (n node) String() string {
 	emptyNodeSymbol := "-"
-	if n.resident == nil {
+	pointerToNode := &n.resident // Pointer
+	if pointerToNode == nil {
 		return emptyNodeSymbol
 	}
-	return n.resident
+	return n.resident.species
 }
 
 // Struct representing a node inhabitant, has a species name, a lifetime and a fitness value; linked to a node by a channel
@@ -56,6 +58,26 @@ type creature struct {
 // Creates a new world struct
 func createWorld(height int, width int, worldType string) world {
 	w := world{nodes: nil, height: height, width: width, oneSpaceMoves: nil, worldType: worldType}
+	w = addNodes(w)
+	fmt.Println("w.nodes = ", w.nodes)
+	return w
+}
+
+// Adds empty nodes to a given  world
+func addNodes(w world) world {
+	// Creates empty 2D node slices
+	w.nodes = make([][]node, w.width)
+	for i := 0; i < w.width; i++ {
+		w.nodes[i] = make([]node, w.height)
+	}
+	// Populates slices with empty nodes
+	for i := 0; i < w.width; i++ {
+		for j := 0; j < w.height; j++ {
+			ch := make(chan string)
+			n := node{horiz: i, vert: j, neighbouringNodes: nil, channelToResident: ch}
+			w.nodes[i][j] = n
+		}
+	}
 	return w
 }
 
