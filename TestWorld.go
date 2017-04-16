@@ -6,12 +6,11 @@ import "fmt"
 // Main struct in which all other simulation elements are located, contains a two-dimensional array of nodes
 type world struct {
 	nodes         [][]node
-	width        int
-	height         int
+	width         int
+	height        int
 	oneSpaceMoves [][]int
 	worldType     string
 }
-
 
 // Returns a string representation of a given world's state
 func (w world) printWorld() {
@@ -33,7 +32,7 @@ type node struct {
 	horiz             int
 	vert              int
 	resident          creature
-	neighbouringNodes []*node        // Slice needs to be made prior to assignment
+	neighbouringNodes []*node     // Slice needs to be made prior to assignment
 	channelToResident chan string // Channel needs to be made prior to assignment
 }
 
@@ -50,30 +49,57 @@ type creature struct {
 func createWorld(width int, height int, worldType string) world {
 	w := world{nodes: nil, width: width, height: height, oneSpaceMoves: nil, worldType: worldType}
 	wPointer := &w
-	addNodes(wPointer) // Running function on pointer, no return value
-	addAntiCreatures(wPointer) // Running function on pointer, no return value
+	addNodes(wPointer)             // Running function on pointer, no return value
+	addAntiCreatures(wPointer)     // Running function on pointer, no return value
 	addNeighbouringNodes(wPointer) // Running function on pointer, no return value
 	return w
 }
 
 // Add roundWorld - where the edges of the world "wrap around" - neighbouring nodes to each node in a given world
 func addRoundworldNeighbours(w *world) { // Recives a pointer
-	possibleMoves := []int{-1,0,1}
+	// Create array of one-space moves
+	possibleMoves := []int{-1, 0, 1}
+	// Iterate through all nodes in world
 	for i := 0; i < w.height; i++ {
 		for j := 0; j < w.width; j++ {
-			n := &w.nodes[i][j]
-			neighboursCoords := make([][]int, 9)
+			n := &w.nodes[i][j]                  // Pointer
+			neighboursCoords := make([][]int, 9) // Slice
 			counter := 0
-			for k:=0 ; k<len(possibleMoves) ;  k++ {
-				for l:=0 ; l<len(possibleMoves) ; l++ {
-					neighbourCoords := []int{((i+possibleMoves[k])%w.height),((j+possibleMoves[l])%w.width)}
+			// Create possible moves array
+			for k := 0; k < len(possibleMoves); k++ {
+				for l := 0; l < len(possibleMoves); l++ {
+					heightCoord := i + possibleMoves[k]
+					if heightCoord == -1 {
+						heightCoord += w.height
+					}
+					widthCoord := j + possibleMoves[l]
+					if widthCoord == -1 {
+						widthCoord += w.width
+					}
+					//neighbourCoords := []int{((i + possibleMoves[k]) % w.height), ((j + possibleMoves[l]) % w.width)}
+					neighbourCoords := []int{(heightCoord % w.height), (widthCoord % w.width)}
 					neighboursCoords[counter] = neighbourCoords
 					counter++
-				} 
+				}
 			}
+			fmt.Println("neighboursCoords = ", neighboursCoords)
 			neighbours := make([]*node, 9)
-			for m:=0 ; m<len(neighbours) ; m++ {
-				neighbours[m] = &w.nodes[neighboursCoords[m][0]][neighboursCoords[m][1]]
+			for m := 0; m < len(neighbours); m++ {
+				heightCoord := i + neighboursCoords[m][0]
+				heightModulus := w.height
+				if heightCoord < 0 {
+					heightCoord += heightModulus
+				} else {
+					heightCoord = heightCoord % heightModulus
+				}
+				widthCoord := j + neighboursCoords[m][1]
+				widthModulus := w.width
+				if widthCoord < 0 {
+					widthCoord += widthModulus
+				} else {
+					widthCoord = widthCoord % widthModulus
+				}
+				neighbours[m] = &w.nodes[heightCoord][widthCoord]
 			}
 			n.neighbouringNodes = neighbours
 		}
@@ -82,9 +108,9 @@ func addRoundworldNeighbours(w *world) { // Recives a pointer
 
 // Calls appropriate neighbouring node assignment function depending on worldType
 func addNeighbouringNodes(w *world) {
-	switch worldType := w.worldType ; worldType {
-		default:
-			addRoundworldNeighbours(w)
+	switch worldType := w.worldType; worldType {
+	default:
+		addRoundworldNeighbours(w)
 	}
 }
 
