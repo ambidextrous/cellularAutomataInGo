@@ -19,7 +19,12 @@ func (w world) printWorld() {
 	for i := 0; i < w.height; i++ {
 		for j := 0; j < w.width; j++ {
 			n := w.nodes[i][j]
-			worldState += n.resident.species
+			residentPointer := &n.resident
+			if residentPointer.species == "" {
+				worldState += "-"
+			} else {
+				worldState += n.resident.species
+			}
 			worldState += space
 		}
 		worldState += "\n\n"
@@ -49,8 +54,8 @@ type creature struct {
 func createWorld(width int, height int, worldType string) world {
 	w := world{nodes: nil, width: width, height: height, oneSpaceMoves: nil, worldType: worldType}
 	wPointer := &w
-	addNodes(wPointer)             // Running function on pointer, no return value
-	addAntiCreatures(wPointer)     // Running function on pointer, no return value
+	addNodes(wPointer) // Running function on pointer, no return value
+	//addAntiCreatures(wPointer)     // Running function on pointer, no return value
 	addNeighbouringNodes(wPointer) // Running function on pointer, no return value
 	return w
 }
@@ -65,7 +70,7 @@ func addRoundworldNeighbours(w *world) { // Recives a pointer
 			n := &w.nodes[i][j]                  // Pointer
 			neighboursCoords := make([][]int, 9) // Slice
 			counter := 0
-			// Create possible moves array
+			// Calculate neighbouring node coordinates
 			for k := 0; k < len(possibleMoves); k++ {
 				for l := 0; l < len(possibleMoves); l++ {
 					heightCoord := i + possibleMoves[k]
@@ -76,34 +81,30 @@ func addRoundworldNeighbours(w *world) { // Recives a pointer
 					if widthCoord == -1 {
 						widthCoord += w.width
 					}
-					//neighbourCoords := []int{((i + possibleMoves[k]) % w.height), ((j + possibleMoves[l]) % w.width)}
 					neighbourCoords := []int{(heightCoord % w.height), (widthCoord % w.width)}
 					neighboursCoords[counter] = neighbourCoords
 					counter++
 				}
 			}
-			fmt.Println("neighboursCoords = ", neighboursCoords)
-			neighbours := make([]*node, 9)
+			// Add neighbours to node
+			neighbours := make([]*node, 9) // Pointer
 			for m := 0; m < len(neighbours); m++ {
-				heightCoord := i + neighboursCoords[m][0]
-				heightModulus := w.height
-				if heightCoord < 0 {
-					heightCoord += heightModulus
-				} else {
-					heightCoord = heightCoord % heightModulus
-				}
-				widthCoord := j + neighboursCoords[m][1]
-				widthModulus := w.width
-				if widthCoord < 0 {
-					widthCoord += widthModulus
-				} else {
-					widthCoord = widthCoord % widthModulus
-				}
-				neighbours[m] = &w.nodes[heightCoord][widthCoord]
+				neighbour := &w.nodes[neighboursCoords[m][0]][neighboursCoords[m][1]]
+				neighbours[m] = neighbour
 			}
 			n.neighbouringNodes = neighbours
 		}
 	}
+	// Test print
+	//for i := 0; i < w.height; i++ {
+	//	for j := 0; j < w.width; j++ {
+	//		fmt.Println(w.nodes[i][j].horiz, w.nodes[i][j].vert)
+	//		for k := 0; k < len(w.nodes[i][j].neighbouringNodes); k++ {
+	//			fmt.Println(w.nodes[i][j].neighbouringNodes[k].horiz, w.nodes[i][j].neighbouringNodes[k].vert)
+	//		}
+	//		fmt.Println("")
+	//	}
+	//}
 }
 
 // Calls appropriate neighbouring node assignment function depending on worldType
@@ -115,15 +116,15 @@ func addNeighbouringNodes(w *world) {
 }
 
 // Adds an anti-creature to each node in a given world
-func addAntiCreatures(w *world) {
-	for i := 0; i < w.height; i++ {
-		for j := 0; j < w.width; j++ {
-			nPointer := &w.nodes[i][j]
-			c := creature{species: "-", lifeTime: 1000000000000, fitness: 0.0, node: nPointer, channelFromNode: nPointer.channelToResident}
-			nPointer.resident = c
-		}
-	}
-}
+//func addAntiCreatures(w *world) {
+//	for i := 0; i < w.height; i++ {
+//		for j := 0; j < w.width; j++ {
+//			nPointer := &w.nodes[i][j]
+//			c := creature{species: "-", lifeTime: 1000000000000, fitness: 0.0, node: nPointer, channelFromNode: nPointer.channelToResident}
+//			nPointer.resident = c
+//		}
+//	}
+//}
 
 // Adds empty nodes to a given  world
 func addNodes(w *world) {
