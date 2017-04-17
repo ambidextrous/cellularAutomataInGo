@@ -1,7 +1,8 @@
 package main
 
-//import "time"
+import "time"
 import "fmt"
+import "math/rand" 
 
 // Main struct in which all other simulation elements are located, contains a two-dimensional array of nodes
 type world struct {
@@ -16,12 +17,13 @@ type world struct {
 func (w world) printWorld() {
 	space := " "
 	worldState := ""
+	emptyNodeSymbol = "-"
 	for i := 0; i < w.height; i++ {
 		for j := 0; j < w.width; j++ {
 			n := w.nodes[i][j]
 			residentPointer := &n.resident
 			if residentPointer.species == "" {
-				worldState += "-"
+				worldState += emptyNodeSymbol
 			} else {
 				worldState += n.resident.species
 			}
@@ -44,10 +46,74 @@ type node struct {
 // Struct representing a node inhabitant, has a species name, a lifetime and a fitness value; linked to a node by a channel
 type creature struct {
 	species         string
+	maxLifeTime		int
 	lifeTime        int
 	fitness         float32
 	node            *node // Pointer
 	channelFromNode chan string
+}
+
+// Creature waits for duration of lifetime. If interrupted, autodestructs; otherwise reproduces.
+func (c creature) live() {
+	start := time.Now()
+	for {
+		select {
+		// If lifetime over, reproduce and return
+		case time.Now() > start+c.lifeTime:
+			fmt.Println("A child is born!")
+			c.node.resident := resident{}
+			c.spawn()
+			return
+		// If interrupted, return without reproducing
+		case <-c.channelFromNode:
+			fmt.Println("Alas, for I am slain!")
+			c.node.resident := resident{}
+			return
+		// Otherwise, do nothing
+		default: // Prevents goroutine from blocking
+		}
+	}
+}
+
+// If node has no resident, creates new creature to occupty it if random value lower than creature's fitness score; if node has resident, creates new resident to occupy it if random value lower than creature fitness - resident fitness
+func (c creature) spawn() {
+	n := &c.node
+	for i:=0 ; i<len(n.neighbouringNodes) ; i++ {
+		neighbour := &n.neighbouringNodes[i]
+		other := &neighbour.resident
+		if other.name == "" {
+			if rand.Float32() <= c.fitness {
+				neighbour.populateNode(c.species)
+			}
+		} else {
+			if rand.Float32() <= c.fitness - other.fitness {
+				n.murderResident()
+				n.populateNode(c.species,c.fitness,c.channelFromNode,c.maxLifeTime)
+			}
+		}
+	}
+}
+
+// Populates a given node with a descendent of the same sepcies with a randomised lifetime
+func (n *node) populateNode(species string, fitness float32, ch chan string, maxLifeTime int) {
+	lifeTime := rand.Intn(maxLifeTime) // Random int in range 0 - maxLifeTime
+	n.resident = creature{species: species, lifeTime: lifeTime, fitness: fitness, node: n, channelFromNode: ch}
+	n.resident.live()
+}
+
+// Sends node resident auto-destruct message
+func (n *node) murderResident{
+	n.channelToResident <- "Die, vile cur!"
+}
+
+
+func spawn(s species, n node) {
+	return species{name: s.name, lifeTime: s.lifeTime, fitness: s.fitness, node: n}
+}
+
+func populateNode(parent species, n node) {
+	child := spawn(parent, n)
+	setResident(n, child)
 }
 
 // Creates a new world struct
@@ -149,11 +215,8 @@ func main() {
 	height := 10
 	worldType := "roundWorld"
 	w := createWorld(width, height, worldType)
-
-	w.printWorld()
-	//fmt.Println(w)
-	//for {
-	//	time.Sleep(500 * time.Millisecond)
-	//	fmt.Println(w)
-	//}
+	for {
+		w.printWorld()
+		time.Sleep(500 * time.Millisecond)
+	}
 }
